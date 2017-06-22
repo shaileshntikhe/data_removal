@@ -18,11 +18,11 @@ object DBUtils extends Logging with Config {
 
   val fetchAllCustomersPS = session.prepare(
     s"select id, vendorid, customermeta, lastname, loginname, migrated, name, password, registeredon, scope, status, verified from vcs.customer"
-  ).setConsistencyLevel(ConsistencyLevel.ONE)
+  )
 
   val fetchAllDevicesPS = session.prepare(
     s"select vendorid, customerid, deviceid, configuration, issecure, lastheartbeatat, metadata, registrationdate, tokenstr from dms.device"
-  ).setConsistencyLevel(ConsistencyLevel.ONE)
+  )
 
   val deleteCustomerPS = session.prepare(s"delete from vcs.customer where id = ? and vendorid = ?")
 
@@ -49,7 +49,7 @@ object DBUtils extends Logging with Config {
       processedRows += 1
     }
 
-    info(s"total deleted row count: $invalidRows")
+    info(s"total deleted customer row count: $invalidRows")
 
     def deleteIfInvalidRow(row: Row) = {
       if (isInvalidRow(row)) {

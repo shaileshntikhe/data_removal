@@ -9,11 +9,9 @@ object Runner extends App with Logging with Config {
 
   import logger.{error, info}
 
-  info(s"app startted")
+  info(s"app started")
 
   val jsonFileName = config.getString("august.data.file")
-
-  info(s"json data:")
 
   val jsonData = JsonReader.parse(jsonFileName)
 
@@ -42,7 +40,7 @@ object Runner extends App with Logging with Config {
   val devices = deviceJson.map(_.get).toSet
 
   // august has taken dump Nov 29th, at 17:56 PST, converting this time to UTC i.e. 2017 Nov 30, 01:00:00 AM,
-  val keepDate = new DateTime(2016, 11, 30, 1, 0, 0, DateTimeZone.UTC)
+  val keepDate = new DateTime(2016, 12, 1, 0, 0, 0, DateTimeZone.UTC)
   info(s"keepDate is: $keepDate")
 
   DBUtils.deleteInvalidCustomers(customers, keepDate)
