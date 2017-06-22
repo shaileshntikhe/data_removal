@@ -17,11 +17,11 @@ object DBUtils extends Logging with Config {
   private val session = cluster.connect()
 
   val fetchAllCustomersPS = session.prepare(
-    s"select id, vendorid, customermeta, lastname, loginname, migrated, name, password, registeredon, scope, status, verified from vcs.customer"
+    s"select id, vendorid, registeredon, loginname, customermeta, lastname, migrated, name, password, scope, status, verified from vcs.customer"
   )
 
   val fetchAllDevicesPS = session.prepare(
-    s"select vendorid, customerid, deviceid, configuration, issecure, lastheartbeatat, metadata, registrationdate, tokenstr from dms.device"
+    s"select vendorid, customerid, deviceid, registrationdate, lastheartbeatat, configuration, issecure, metadata, tokenstr from dms.device"
   )
 
   val deleteCustomerPS = session.prepare(s"delete from vcs.customer where id = ? and vendorid = ?")
