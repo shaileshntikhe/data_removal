@@ -125,4 +125,8 @@ object DBUtils extends Logging with Config {
       Some(row.getDate(dateColumn).getTime)
   }
 
+  def closeCluster = cluster.close()
+
+  def closeSession = session.close()
+
 }

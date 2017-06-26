@@ -46,6 +46,11 @@ object Runner extends App with Logging with Config {
   DBUtils.deleteInvalidCustomers(customers, keepDate)
   DBUtils.deleteInvalidDevices(devices, keepDate)
 
+  info(s"clean up completed, closing cassandra session")
+
+  DBUtils.closeSession
+  DBUtils.closeCluster
+
 
   info(s"app completed")
 
