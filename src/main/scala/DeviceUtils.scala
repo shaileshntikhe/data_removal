@@ -9,7 +9,7 @@ object DeviceUtils extends Logging {
   import logger.{debug, error}
 
   implicit val customerRead: Reads[Device] = (
-    (JsPath \ "intellivisionCreds" \ "name").read[String] and
+    (JsPath \ "intellivisionCreds" \ "deviceID").read[String] and
       (JsPath \ "intellivisionCreds" \ "customerID").read[String]
     ) (Device.apply _)
 
