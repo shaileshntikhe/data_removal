@@ -1,4 +1,4 @@
-name := "auguest_data_cleanup"
+name := "august_data_cleanup"
 
 version := "1.0"
 
