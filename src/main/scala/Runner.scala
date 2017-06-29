@@ -51,7 +51,6 @@ object Runner extends App with Logging with Config {
   DBUtils.closeSession
   DBUtils.closeCluster
 
-
   info(s"app completed")
 
 }

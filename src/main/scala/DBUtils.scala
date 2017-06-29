@@ -30,6 +30,7 @@ object DBUtils extends Logging with Config {
 
   val deleteDeviceStatusPS = session.prepare(s"delete from dms.devicestatus where vendorid = ? and customerid = ? and deviceid = ?")
 
+  val fetchLoginsPS = session.prepare(s"select time from vcs.logins where customerid = ?")
 
   def deleteInvalidCustomers(customers: Set[Customer], keepDate: DateTime) = {
 
@@ -63,14 +64,26 @@ object DBUtils extends Logging with Config {
     }
 
     def deleteRow(row: Row) = {
-      session.execute(deleteCustomerPS.bind(row.getString("id"), row.getInt("vendorid").asInstanceOf[Integer]))
+      //      session.execute(deleteCustomerPS.bind(row.getString("id"), row.getInt("vendorid").asInstanceOf[Integer]))
     }
 
     def isInvalidRow(row: Row): Boolean = {
-      // registration date is less than keepdate and customer doesn't exist in data provided by august
+      // registration date is less than keepDate and customer doesn't exist in data provided by august && customer is inactive
       getDate(row, "registeredon").exists(keepDate.isAfter) &&
-        !customers.contains(Customer(row.getString("id").trim, row.getString("loginname").trim))
+      !customers.contains(Customer(row.getString("id").trim, row.getString("loginname").trim)) &&
+      isCustomerInActive(row)
     }
+
+    // make sure that keepDate is lower than login entry
+    def isCustomerActive(row: Row): Boolean = {
+      Option(row.getString("id"))
+        .map(_.trim)
+        .exists { id =>
+          session.execute(fetchLoginsPS.bind(id)).exists(row => getDate(row, "time").exists(keepDate.isBefore))
+        }
+    }
+
+    def isCustomerInActive(row: Row): Boolean = !isCustomerActive(row)
 
   }
 
@@ -106,15 +119,22 @@ object DBUtils extends Logging with Config {
     }
 
     def deleteDeviceWithStatus(row: Row) = {
-      session.execute(deleteDevicePS.bind(row.getLong("vendorid").asInstanceOf[Object], row.getString("customerid"), row.getString("deviceid")))
-      session.execute(deleteDeviceStatusPS.bind(row.getLong("vendorid").asInstanceOf[Object], row.getString("customerid"), row.getString("deviceid")))
+      /*session.execute(deleteDevicePS.bind(row.getLong("vendorid").asInstanceOf[Object], row.getString("customerid"), row.getString("deviceid")))
+      session.execute(deleteDeviceStatusPS.bind(row.getLong("vendorid").asInstanceOf[Object], row.getString("customerid"), row.getString("deviceid")))*/
     }
 
     def isInvalidRow(row: Row): Boolean = {
-      // registration date is less than keepdate and device doesn't exist in data provided by august
+      // registration date is less than keepDate and device doesn't exist in data provided by august and device is inactive
       getDate(row, "registrationdate").exists(keepDate.isAfter) &&
-        !devices.contains(Device(row.getString("deviceid").trim, row.getString("customerid").trim))
+      !devices.contains(Device(row.getString("deviceid").trim, row.getString("customerid").trim)) &&
+      isDeviceInActive(row)
     }
+
+    def isDeviceActive(row: Row): Boolean = {
+      getDate(row, "lastheartbeatat").exists(keepDate.isBefore)
+    }
+
+    def isDeviceInActive(row: Row): Boolean = !isDeviceActive(row)
 
   }
 
